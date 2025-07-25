@@ -20,18 +20,26 @@ const topup = async (req, res, next) => {
             return responseHelper(res, 'Paramter amount hanya boleh angka dan tidak boleh lebih kecil dari 0');
         }
 
-
         const { email, balance } = await findUserByEmail(req.user.email);
         const newBalance = balance + top_up_amount;
-        await updateUserBalance(email, newBalance);
+
+        const uuid = uuidv4();
+        const created_on = new Date();
+        const invoice_number = `INV${created_on.getFullYear()}${created_on.getMonth() + 1}${created_on.getDate()}-${uuid.slice(0, 3)}`;
 
         const transactionData = {
+            id: uuid,
             user_id: req.user.id,
             service_id: null,
+            invoice_number,
             transaction_type: 'TOPUP',
-            total_amount: top_up_amount
+            total_amount: top_up_amount,
+            created_on: created_on,
         }
+
         await createTransaction(transactionData);
+        await updateUserBalance(email, newBalance);
+
         return responseHelper(res, 'Top Up Balance berhasil', { balance: newBalance });
     } catch (error) {
         next(error)
