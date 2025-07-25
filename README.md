@@ -25,3 +25,7 @@ cp .env.example .env
 npm run dev
 # or
 node index.js
+
+## ⚙️ ERD
+![ERD](public/ERD.png)
+
