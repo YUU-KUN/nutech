@@ -5,6 +5,29 @@ Supports membership, info, transaction, and balance modules. Auth, validation, e
 
 ---
 
+## 📮 API Documentation
+
+- 📘 [Postman Docs](https://documenter.getpostman.com/view/10035045/2sB34oCxix)
+
+
+## 🌐 Live Demo
+
+- 🔗 [https://nutech-api.example.com](https://nutech.up.railway.app/)  
+
+---
+
+## 📦 Tech Stack
+- Node.js + Express.js
+- MySQL
+- Bcrypt for password hashing 
+- JWT for authentication
+- Express-validator for request validation
+- Express-fileupload untuk file upload
+- UUID for id generation
+- Dotenv for environment variable management
+
+---
+
 ## ⚙️ Setup & Run
 
 ```bash
@@ -25,7 +48,10 @@ cp .env.example .env
 npm run dev
 # or
 node index.js
+```
 
-## ⚙️ ERD
+---
+
+## ⚙️ Entity Relationship Diagram
 ![ERD](public/ERD.png)
 
