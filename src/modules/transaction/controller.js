@@ -62,8 +62,8 @@ const history = async (req, res, next) => {
 
         const transactions = await getUserTransactions(req.user.id, options);
         const response = {
-            records: transactions,
             ...options,
+            records: transactions,
         }
 
         return responseHelper(res, 'Get History Berhasil', response);
