@@ -123,7 +123,6 @@ const updateProfileImage = async (req, res, next) => {
         await updatePhoto(currentEmail, fileName);
 
         const existingUser = await findUserByEmail(currentEmail);
-        console.log(existingUser);
 
         const response = {
             email: existingUser.email,
