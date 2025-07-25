@@ -1,14 +1,10 @@
 const db = require("../../config/db");
 const bcrypt = require('bcrypt');
-const { v4: uuidv4 } = require('uuid');
 
-const registerUser = async ({ first_name, last_name, email, password }) => {
-    const id = uuidv4();
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+const registerUser = async ({ id, first_name, last_name, email, password, profile_image }) => {
     const [result] = await db.query(
-        `INSERT INTO users (id, first_name, last_name, email, password) VALUES (?, ?, ?, ?, ?)`,
-        [id, first_name, last_name, email, hashedPassword]
+        `INSERT INTO users (id, first_name, last_name, email, password, profile_image) VALUES (?, ?, ?, ?, ?, ?)`,
+        [id, first_name, last_name, email, password, profile_image]
     );
     return result.insertId;
 }
@@ -26,7 +22,14 @@ const updateUser = async (currentEmail, { email, first_name, last_name, profile_
         `UPDATE users SET email = ?, first_name = ?, last_name = ?, profile_image = ? WHERE email = ?`,
         [email, first_name, last_name, profile_image, currentEmail]
     );
-    
+    return result.affectedRows;
+}
+
+const updatePhoto = async (email, profile_image) => {
+    const [result] = await db.query(
+        `UPDATE users SET profile_image = ? WHERE email = ?`,
+        [profile_image, email]
+    );
     return result.affectedRows;
 }
 
@@ -43,5 +46,6 @@ module.exports = {
     registerUser,
     findUserByEmail,
     updateUser,
+    updatePhoto,
     updateUserBalance,
 }

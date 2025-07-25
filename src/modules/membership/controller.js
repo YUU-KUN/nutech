@@ -1,11 +1,23 @@
 const { responseHelper } = require("../../utils/responseHelper");
-const { registerUser, findUserByEmail, updateUser } = require("./service");
+const { registerUser, findUserByEmail, updateUser, updatePhoto } = require("./service");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const { v4: uuidv4 } = require('uuid');
 
 const registration = async (req, res, next) => {
     try {
-        await registerUser(req.body);
+        const { email, first_name, last_name, password } = req.body;
+
+        const newUser = {
+            id: uuidv4(),
+            first_name,
+            last_name,
+            email,
+            password: await bcrypt.hash(password, 10),
+            profile_image: 'profile.jpg' //default avatar image
+        }
+
+        await registerUser(newUser);
         return responseHelper(res, 'Registrasi berhasil silahkan login', null);
     } catch (error) {
         next(error);
@@ -46,8 +58,14 @@ const login = async (req, res, next) => {
 
 const getProfile = async (req, res, next) => {
     try {
-        const { email, first_name, last_name, profile_image } = await findUserByEmail(req.user.email);
-        return responseHelper(res, 'Sukses', { email, first_name, last_name, profile_image });
+        const { id, password, profile_image, ...restUserData } = await findUserByEmail(req.user.email);
+
+        const baseUrl = `${req.protocol}://${req.hostname}`
+        const response = {
+            ...restUserData,
+            profile_image: process.env.NODE_ENV === 'development' ? `${baseUrl}:${process.env.PORT}/${profile_image}` : `${baseUrl}/${profile_image}`
+        }
+        return responseHelper(res, 'Sukses', response);
     } catch (error) {
         next(error);
     }
@@ -56,28 +74,64 @@ const getProfile = async (req, res, next) => {
 const updateProfile = async (req, res, next) => {
     try {
         const currentEmail = req.user.email;
-        const existingUser = await findUserByEmail(req.user.email);
+        const { email, first_name, last_name, profile_image } = await findUserByEmail(currentEmail);
         const newData = {
-            email: req.body.email || existingUser.email,
-            first_name: req.body.first_name || existingUser.first_name,
-            last_name: req.body.last_name || existingUser.last_name,
-            profile_image: req.body.profile_image || existingUser.profile_image,
+            email,
+            first_name: req.body?.first_name || first_name,
+            last_name: req.body?.last_name || last_name,
+            profile_image,
         };
 
         await updateUser(currentEmail, newData);
-        return responseHelper(res, 'Update Pofile berhasil', newData);
+
+        const baseUrl = `${req.protocol}://${req.hostname}`
+        const response = {
+            ...newData,
+            profile_image: process.env.NODE_ENV === 'development' ? `${baseUrl}:${process.env.PORT}/${profile_image}` : `${baseUrl}/${profile_image}`,
+        }
+        return responseHelper(res, 'Update Pofile berhasil', response);
     } catch (error) {
         next(error);
     }
 }
 
-// TODO
 const updateProfileImage = async (req, res, next) => {
     try {
+        const baseUrl = `${req.protocol}://${req.hostname}`
+
+        if (!req.files || Object.keys(req.files).length === 0) {
+            res.statusCode = 400;
+            return responseHelper(res, 'Tidak ada file yang diupload', null);
+        }
+
+        const allowedTypes = ['image/jpeg', 'image/png'];
+        if (!allowedTypes.includes(req.files.file.mimetype)) {
+            res.statusCode = 400;
+            return responseHelper(res, 'Format Image tidak sesuai', null);
+        }
+
+        const file = req.files.file
+        const fileName = Date.now() + '-' + file.name
+        file.mv(`./public/${fileName}`, (err) => {
+            if (err) {
+                res.statusCode = 500;
+                return responseHelper(res, 'Gagal upload file', null);
+            }
+        })
+
         const currentEmail = req.user.email;
-        const { profile_image } = req.body;
-        await updateUser(currentEmail, { profile_image });
-        return responseHelper(res, 'Update Profile Image berhasil', { profile_image });
+        await updatePhoto(currentEmail, fileName);
+
+        const existingUser = await findUserByEmail(currentEmail);
+        console.log(existingUser);
+
+        const response = {
+            email: existingUser.email,
+            first_name: existingUser.first_name,
+            last_name: existingUser.last_name,
+            profile_image: process.env.NODE_ENV === 'development' ? `${baseUrl}:${process.env.PORT}/${fileName}` : `${baseUrl}/${fileName}`
+        }
+        return responseHelper(res, 'Update Profile Image berhasil', response);
     } catch (error) {
         next(error)
     }
@@ -88,4 +142,5 @@ module.exports = {
     login,
     getProfile,
     updateProfile,
+    updateProfileImage,
 }

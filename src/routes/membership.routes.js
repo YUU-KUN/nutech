@@ -1,6 +1,6 @@
 const express = require('express');
-const { registration, login, getProfile, updateProfile } = require('../modules/membership/controller');
-const { registerValidator, loginValidator } = require('../modules/membership/validator');
+const { registration, login, getProfile, updateProfile, updateProfileImage } = require('../modules/membership/controller');
+const { loginValidator, registerValidator } = require('../modules/membership/validator');
 const validateRequest = require('../middlewares/validateRequest');
 const verifyToken = require('../middlewares/verifyToken');
 const router = express.Router();
@@ -10,8 +10,6 @@ router.post('/login', loginValidator, validateRequest, login)
 
 router.get('/profile', verifyToken, getProfile);
 router.put('/profile/update', verifyToken, updateProfile);
-
-// TODO
-// router.put('/profile/image', verifyToken, updateProfile);
+router.put('/profile/image', verifyToken, updateProfileImage);
 
 module.exports = router;

@@ -8,7 +8,6 @@ const registerValidator = [
     body('email').custom(async (value, { req }) => {
         const { email } = req.body;
         const [user] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-        
         if (user.length > 0) {
             throw new Error('Email sudah terdaftar');
         }
@@ -19,7 +18,7 @@ const registerValidator = [
 const loginValidator = [
     body('email').isEmail().withMessage('Email tidak valid'),
     body('password').isLength({ min: 8 }).withMessage('Password minimal 8 karakter'),
-]
+];
 
 module.exports = {
     registerValidator,
