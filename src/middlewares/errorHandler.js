@@ -13,7 +13,7 @@ const errorHandler = (err, req, res, next) => {
 
     res.statusCode = statusCode;
 
-    return responseHelper(res, message, err);
+    return responseHelper(res, message, null);
 
 };
 
