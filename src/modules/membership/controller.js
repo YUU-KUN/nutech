@@ -58,7 +58,7 @@ const login = async (req, res, next) => {
 
 const getProfile = async (req, res, next) => {
     try {
-        const { id, password, profile_image, ...restUserData } = await findUserByEmail(req.user.email);
+        const { id, password, profile_image, balance, ...restUserData } = await findUserByEmail(req.user.email);
 
         const baseUrl = `${req.protocol}://${req.hostname}`
         const response = {
