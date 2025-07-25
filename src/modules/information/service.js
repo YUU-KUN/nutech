@@ -6,8 +6,7 @@ const getBanners = async () => {
 }
 
 const getServices = async () => {
-    const [services] = await db.query(
-        'SELECT * FROM services');
+    const [services] = await db.query('SELECT * FROM services');
     return services;
 }
 
